@@ -10,8 +10,8 @@ import time
 traw = np.loadtxt(open("time.csv", "rb"), delimiter=",", skiprows=0)
 xraw = np.loadtxt(open("xout.csv", "rb"), delimiter=",", skiprows=0)
 #lraw = np.loadtxt(open("lout.csv", "rb"), delimiter=",", skiprows=1)
-fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
-params = np.loadtxt(open("parameters.dat", "rb"), delimiter=",", skiprows=1)
+#fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
+#params = np.loadtxt(open("parameters.dat", "rb"), delimiter=",", skiprows=1)
 
 nscale = 1.0e9  # WARNING this is *only* for plotting, danger!
 
@@ -24,7 +24,7 @@ nscale = 1.0e9  # WARNING this is *only* for plotting, danger!
 
 tdata = nscale * traw
 xdata = nscale * xraw
-fdata = nscale * fraw
+#fdata = nscale * fraw
 
 #fig0, ax = plt.subplots()
 #ax.plot(tdata,supdata)
@@ -32,7 +32,7 @@ fdata = nscale * fraw
 #fig0.savefig("plots/plot_sup.png")
 
 fig1, ax = plt.subplots()
-ax.plot(tdata,xdata)
+ax.plot(tdata,xdata[200:400])
 ax.set(xlabel='t (ns)', ylabel='x (nm)')
 fig1.savefig("plots/plot_x.png")
 #
