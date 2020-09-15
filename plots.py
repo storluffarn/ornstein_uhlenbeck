@@ -7,8 +7,8 @@ import matplotlib.ticker as ticker
 import matplotlib.colors as colors
 import time 
 
-traw = np.loadtxt(open("time.csv", "rb"), delimiter=",", skiprows=0)
-xraw = np.loadtxt(open("xout.csv", "rb"), delimiter=",", skiprows=0)
+traw = np.loadtxt(open("time0.csv", "rb"), delimiter=",", skiprows=0)
+xraw = np.loadtxt(open("xout0.csv", "rb"), delimiter=",", skiprows=0)
 #lraw = np.loadtxt(open("lout.csv", "rb"), delimiter=",", skiprows=1)
 #fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
 #params = np.loadtxt(open("parameters.dat", "rb"), delimiter=",", skiprows=1)
@@ -32,9 +32,11 @@ xdata = nscale * xraw
 #fig0.savefig("plots/plot_sup.png")
 
 fig1, ax = plt.subplots()
-ax.plot(tdata,xdata[200:400])
+#ax.plot(tdata,xdata[200:400],'.')
+ax.plot(tdata,xdata,'.')
 ax.set(xlabel='t (ns)', ylabel='x (nm)')
 fig1.savefig("plots/plot_x.png")
+
 #
 #fig2, ax = plt.subplots()
 #ax.plot(tdata,ldata)
