@@ -33,7 +33,7 @@ xdata = nscale * xraw
 
 fig1, ax = plt.subplots()
 #ax.plot(tdata,xdata[200:400],'.')
-ax.plot(tdata,xdata,'.')
+ax.plot(tdata,xdata,'.', markersize = 2)
 ax.set(xlabel='t (ns)', ylabel='x (nm)')
 fig1.savefig("plots/plot_x.png")
 

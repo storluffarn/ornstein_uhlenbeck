@@ -60,9 +60,9 @@ int main()
 	string tomfile = "tomout.csv";
     string pfile = "parameters.dat";
     
-    uint totalruns = 10; // please keep me a factor of nfiles
+    uint totalruns = 1; // please keep me a factor of nfiles
     uint ncores = 4;
-    uint nfiles = 5; 
+    uint nfiles = 2; 
 
     uint runs = totalruns / nfiles;
 
@@ -182,7 +182,7 @@ int main()
             }
         }
         
-        ofstream xstream, tstream;
+        ofstream xstream, tstream ;
         
         tstream.open(tfile);
         for (uint k = 0; k < ts.size(); k++)
@@ -190,7 +190,8 @@ int main()
 
         xstream.open(xfile);
         for (uint k = 0; k < xs.size(); k++)
-            xstream << xs[k] << endl;
+            xstream << xs[k] << endl
+                    << xs[k+1] << endl;
         
 
         //uint writeat = 500;
