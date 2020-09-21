@@ -53,6 +53,20 @@ int main()
     double tstep = modif * 3e-14;	
 	uint tsteps = 1.0/modif * 1.0e5;	// has to be even beucasue lazyness
 
+    vector <uint> antsteps;
+    ifstream reads ("./antimes.csv");
+    
+    uint shift = round(0.025e-9 / tstep);
+    if (reads.is_open())
+    {
+        uint atstep;
+
+        while(reads >> atstep)
+        {
+            if (atstep > shift)
+            {antsteps.push_back(atstep-shift);}
+        }
+    }
 
 	uint ttoa = ceil(latcon/(tstep));	// timesteps to minima
 
@@ -62,7 +76,7 @@ int main()
     
     uint totalruns = 1; // please keep me a factor of nfiles
     uint ncores = 4;
-    uint nfiles = 2; 
+    uint nfiles = 1; 
 
     uint runs = totalruns / nfiles;
 
@@ -72,11 +86,13 @@ int main()
 	    string tfile = "time" + to_string(m) + ".csv";
         
         vector <double> publicpos;
+        vector <double> publicf;
         publicpos.reserve(runs*tsteps);
 
         #pragma omp parallel
         {
             vector <double>privatepos;
+            vector <double>privatef;
             if (runs > ncores)
                 privatepos.reserve(tsteps*ceil((double)runs/ncores));
             else
@@ -124,79 +140,87 @@ int main()
                     	//afm.calcpot();
                         afm.calcfric();
 
+                    	//afm.pushvals();
                     	afm.pushvalslite();
                     	afm.inctime();
                     }
 
                 auto posptr = afm.getposs();
                 privatepos.insert(privatepos.end(),posptr->begin(),posptr->end());
+                auto fptr = afm.getfrics();
+                privatef.insert(privatef.end(),fptr->begin(),fptr->end());
+                //afm.writedata();    // REMOVE WHEN PARALLEL
             }
             #pragma omp critical
             publicpos.insert(publicpos.end(),privatepos.begin(),privatepos.end());
+            publicf.insert(publicf.end(),privatef.begin(),privatef.end());
         }
         
         //afm.printins();
         //afm.printouts();
         //afm.printavgs();
-        //afm.writedatalite();
     
-        vector <double> ts;
-        vector <double> xs; 
-        ts.reserve(tsteps + runs/10);
-        xs.reserve(tsteps + runs/10);
+        //// write at significant x incrrease
+        //vector <double> ts;
+        //vector <double> xs; 
+        //ts.reserve(tsteps + runs/10);
+        //xs.reserve(tsteps + runs/10);
         
-        uint d0 = 10;
-        int shift = 1;
+        //uint d0 = 10;
+        //int shift = 1;
 
-        for (uint k = 0; k < runs; k++) 
-        {
-            uint t0 = k*tsteps;
-            double xscale = *max_element(publicpos.begin()+t0, publicpos.begin() + (k+1)*tsteps - 1);
-            double threshold = 1.5e-3 * xscale;
+        //for (uint k = 0; k < runs; k++) 
+        //{
+        //    uint t0 = k*tsteps;
+        //    double xscale = *max_element(publicpos.begin()+t0, publicpos.begin() + (k+1)*tsteps - 1);
+        //    double threshold = 1.5e-3 * xscale;
 
 
-            for (uint l = 0; l < tsteps; l += d0 + shift)
-            {
-                uint next = l + 2*shift;
+        //    for (uint l = 0; l < tsteps; l += d0 + shift)
+        //    {
+        //        uint next = l + 2*shift;
 
-                if (t0 + next > publicpos.size()) // out of bounds check
-                    break;
+        //        if (t0 + next > publicpos.size()) // out of bounds check
+        //            break;
+        //
+        //        double x1 = publicpos[t0+l];
+        //        double x2 = publicpos[t0+next];
+
+        //        //cout << l << " " << next << " " << next - l << endl 
+        //        //     << x1 << " " << x2 << " " << x2 - x1 << endl;
+
+        //        if (abs(x2 - x1) > threshold)
+        //        {
+        //            ts.push_back(t0+l);
+        //            xs.push_back(publicpos[t0+l]);
+        //            
+        //            shift = 1;
+        //        }
+        //        else
+        //        {
+        //            shift *= 2;
+        //        }
+        //    }
+        //}
         
-                double x1 = publicpos[t0+l];
-                double x2 = publicpos[t0+next];
-
-                //cout << l << " " << next << " " << next - l << endl 
-                //     << x1 << " " << x2 << " " << x2 - x1 << endl;
-
-                if (abs(x2 - x1) > threshold)
-                {
-                    ts.push_back(t0+l);
-                    xs.push_back(publicpos[t0+l]);
-                    
-                    shift = 1;
-                }
-                else
-                {
-                    shift *= 2;
-                }
-            }
-        }
+        //ofstream xstream, tstream ;
         
-        ofstream xstream, tstream ;
-        
-        tstream.open(tfile);
-        for (uint k = 0; k < ts.size(); k++)
-            tstream << ts[k] << endl;
+        //tstream.open(tfile);
+        //for (uint k = 0; k < ts.size() - 1; k++)
+        //    tstream << ts[k] << endl;
 
-        xstream.open(xfile);
-        for (uint k = 0; k < xs.size(); k++)
-            xstream << xs[k] << endl
-                    << xs[k+1] << endl;
+        //xstream.open(xfile);
+        //for (uint k = 0; k < xs.size() - 1; k++)
+        //    xstream << xs[k] << endl
+        //            << xs[k+1] << endl;
+        //xstream.close();
+        //tstream.close();
         
-
-        //uint writeat = 500;
+        //// write at constant distance
+        
+        //uint writeat = 1;
         //vector <double> times;
-        //times.reserve();
+        //times.reserve(round(tsteps/writeat));
 
         //for (uint k = 0; k < tsteps; k++)
         //    times.push_back(k*tstep);
@@ -213,14 +237,53 @@ int main()
         //}
 
         //xstream.open(xfile);
-        //for (uint k = 0; k < publicpos.size(); k++)
-
+        //for (uint k = 0; k < publicpos.size() - 1; k++)
         //{
         //    if (k % writeat == 0) 
         //    {
-        //        xstream << publicpos[k] << endl;
+        //        xstream << setprecision(16) << publicpos[k] << endl << publicpos[k+1] << endl;
         //    }
         //}
+
+        //tstream.close();
+        //xstream.close();
+       
+        // write slipping points 
+
+        //vector <uint> slips;
+        //uint slipmode = 1;
+        //uint adjacent = 10;
+        //uint ttoa = ceil(latcon/(tstep*supvel)); // timesteps between lattice spacings
+        ////uint stride = 1000;
+        //uint stride = ttoa/4.0;
+        //findslips(slipmode,adjacent,stride,&times,&publicf,&slips);
+        //
+        //ofstream sstream;
+
+        //sstream.open("slips.dat");
+        //for (auto &k : slips)
+        //    sstream << k*tstep << endl;
+       
+        //sstream.close();
+
+        //// write at predefined grid
+        
+        ofstream xstream, tstream; 
+        
+        vector <double> times;
+        for (auto &k : antsteps)
+            times.push_back(k*tstep);
+
+        tstream.open(tfile);
+        for (auto &k : times)
+            tstream << k << endl; 
+
+        xstream.open(xfile);
+        for (auto &k : antsteps)
+            xstream << setprecision(16) << publicpos[k] << endl << publicpos[k+1] << endl;
+        tstream.close();
+        xstream.close();
+        
     }
 }
 

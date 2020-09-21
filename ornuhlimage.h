@@ -669,5 +669,209 @@ pair <double, double> tomlin::langevin()
 	return out;
 }
 
+void findslips (uint mode, uint adj, uint stride, vector <double>* tvals, vector <double>* fvals, vector <uint>* slips)
+{
 
+    vector <uint> slipsish;
 
+    // method I: identify slipping regions by slope, then fins slipping points
+    // by interval halving
+    if (mode == 1)
+    {
+        uint curr = 0;
+        uint next = stride;
+        uint end = fvals->size();
+        bool climbing = true;
+        while (next < end)
+        {
+            //uint next = start + round(adj+exp(logstep*loops));
+
+            //cout << curr << " " << next << " " << end << " " << tvals->size() << " " << fvals->size() << endl;
+            double x1 = tvals->at(curr);
+            double x2 = tvals->at(next);
+
+            double y1 = fvals->at(curr);
+            double y2 = fvals->at(next);
+
+            double slope = (y2 - y1) / (x2 - x1);
+
+            if (slope > 0.0)
+                climbing = true;
+
+            if (slope < 0.0 && climbing)
+            {
+                climbing = false;
+                slipsish.push_back(curr);
+            }
+            curr = next;
+            next = curr + stride;
+
+            //cout << x1 << " " << x2 << " " << y1 << " " << y2 << " " << x2-x1 << " " << y2-y1 << " " << slope << endl;
+        }
+
+        //cout << "slipsish has size: " << slipsish.size() << endl;
+
+        //for (auto &el : slipsish)
+        //	cout << el << endl;
+        //cout << endl;
+        
+        slips->reserve(round(end/( (double) stride )));
+        
+        for (uint k = 0; k < slipsish.size() - 1; k++)
+        {
+            curr = slipsish[k];
+            next = slipsish[k]+stride;
+            //cout << curr << " " << next << " " << end << endl << " " << tvals->size() << " " << fvals->size() << endl;
+
+            if (next >= end)     // slightly ugly termination
+                break;
+
+            double zero = 1e-11;
+            double x1 = 0;
+            x1 = tvals->at(curr);
+
+            bool left = true;						// slip is to the left
+            uint distance = abs((int)next - (int)curr);		// this is stridem but whatever...
+            uint half = 0;	
+            half = round( half + distance/2.0 );
+            double xhalf = tvals->at(half);
+
+            //cout << "curr is: " << curr << " next is: " << next << " distance is: " << distance << endl;
+
+            //cout << "distance greater than adj? " << ((distance > adj) ? 1 : 0) << " " << endl;	
+            while (distance > adj)
+            {
+                if (left)
+                {
+                    if (x1 - xhalf > zero)
+                    {
+                        left = true;
+                    }
+                    else
+                    {
+                        left = false;
+                        swap(curr,half);
+                    }
+                }
+                else
+                {
+                    if (x1 - xhalf > zero)
+                    {
+                        left = false;
+                    }
+                    else
+                    {
+                        left = true;
+                        swap(curr,half);
+                    }
+                }
+                
+                distance = abs((int)half-(int)curr);
+                
+                x1 += tvals->at(curr);
+                half = round( half + distance/2.0 );
+                xhalf += tvals->at(half);
+            }
+
+            if(left)
+            {
+                slips->push_back(curr);
+            }
+            else
+            {
+                slips->push_back(next);
+            }
+        }
+    }
+    // method II find slipping rebion by difference tolerance, then find 
+    else if (mode == 2)
+    {
+        uint curr = 0;
+        uint next = stride;
+        uint end = fvals->size();
+        bool climbing;
+        while (next < end)
+        {
+            //uint next = start + round(adj+exp(logstep*loops));
+
+            double x1 = tvals->at(curr);
+            double x2 = tvals->at(next);
+
+            double y1 = fvals->at(curr);
+            double y2 = fvals->at(next);
+
+            double slope = (y2 - y1) / (x2 - x1);
+
+            if (slope > 0.0)
+                climbing = true;
+
+            if (slope < 0.0 && climbing)
+            {
+                climbing = false;
+                slipsish.push_back(next);
+            }
+            curr = next;
+            next = curr + stride;
+        }
+
+        //cout << "slipsish has size: " << slipsish.size() << endl;
+
+        //for (auto &el : slipsish)
+        //	cout << el << endl;
+        //cout << endl;
+        
+        slips->reserve(round(end/( (double) stride )));
+        
+        for (uint k = 0; k < slipsish.size() - 1; k++)
+        {
+
+            uint curr = slipsish[k];
+            uint prev = curr - stride;
+            uint next = curr + stride;
+            uint distance = stride;
+
+            //bool leftofmin;
+
+            double ycurr = fvals->at(curr);
+            double yprev = fvals->at(prev);
+            double ynext = fvals->at(next);
+
+            int p;
+
+            if (ycurr - ynext > 0)
+            {
+                //leftofmin = true;
+                p = 1;
+            }
+            else 
+            {
+                //leftofmin = false;
+                p = -1;
+            }
+
+            
+            while (distance > adj)
+            {
+                distance = round(distance / 2.0);
+                
+                next = round(curr + p*distance);
+
+                ycurr = fvals->at(curr);
+                ynext = fvals->at(next);
+                
+                if (ycurr - ynext > 0)
+                {
+                    p = 1;
+                }
+                else
+                {
+                    p = -1;
+                }
+
+                curr = next;
+            }
+
+            slips->push_back(curr);
+        }
+    }
+}

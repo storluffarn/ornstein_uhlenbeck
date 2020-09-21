@@ -10,8 +10,11 @@ import time
 traw = np.loadtxt(open("time0.csv", "rb"), delimiter=",", skiprows=0)
 xraw = np.loadtxt(open("xout0.csv", "rb"), delimiter=",", skiprows=0)
 #lraw = np.loadtxt(open("lout.csv", "rb"), delimiter=",", skiprows=1)
-#fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
+fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
 #params = np.loadtxt(open("parameters.dat", "rb"), delimiter=",", skiprows=1)
+sraw = np.loadtxt(open("slips.dat", "rb"), skiprows=0)
+snthraw = np.loadtxt(open("slipsnth.dat", "rb"), skiprows=0)
+sthraw = np.loadtxt(open("slipsth.dat", "rb"), skiprows=0)
 
 nscale = 1.0e9  # WARNING this is *only* for plotting, danger!
 
@@ -20,11 +23,14 @@ nscale = 1.0e9  # WARNING this is *only* for plotting, danger!
 #sdata = nscale * traw[:,1]
 #xdata = nscale * xraw[:,0]
 ##ldata = nscale * lraw[:,0]
-#fdata = nscale * fraw[:,2]
+fdata = nscale * fraw[:,2]
 
 tdata = nscale * traw
 xdata = nscale * xraw
 #fdata = nscale * fraw
+sdata = nscale * sraw
+sthdata = nscale * sthraw
+snthdata = nscale * snthraw
 
 #fig0, ax = plt.subplots()
 #ax.plot(tdata,supdata)
@@ -33,7 +39,7 @@ xdata = nscale * xraw
 
 fig1, ax = plt.subplots()
 #ax.plot(tdata,xdata[200:400],'.')
-ax.plot(tdata,xdata,'.', markersize = 2)
+ax.plot(tdata,xdata[0:len(xdata):2],'.', markersize = 1)
 ax.set(xlabel='t (ns)', ylabel='x (nm)')
 fig1.savefig("plots/plot_x.png")
 
@@ -72,3 +78,38 @@ fig1.savefig("plots/plot_x.png")
 #ax.plot(tdata,fdata)
 #ax.set(xlabel='t (ns)', ylabel='f (nN)')
 #fig4.savefig("plots/plot_f.png")
+#
+#fig5, ax = plt.subplots()
+#ax.plot(tdata,fdata)
+#for line in sdata :
+#    ax.axvline(x=line)
+#ax.set(xlabel='t (ns)', ylabel='f (nN)')
+#fig5.savefig("plots/plot_s.png")
+#
+
+#latc = 2.5e-1
+#s0 = snthdata[1] - latc
+#
+#s0s = s0 + latc * np.array(range(1197))
+#
+#print(s0s)
+#
+##def slipmod (x) : 
+##    return x % s0
+##
+##sdiff = np.array([slipmod(slip) for slip in sthdata])
+#
+#sdiff = np.array([])
+#
+#for s in s0s :
+#    dist = min(abs(sthdata - s))
+#    sdiff = np.append(sdiff,dist)
+#
+#fig6, ax = plt.subplots()
+#
+#nbins = 100
+#n,f1,patches = ax.hist(sdiff,nbins,edgecolor='black')
+#
+#fig6.savefig("plots/histogram.png")
+
+
