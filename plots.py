@@ -7,14 +7,14 @@ import matplotlib.ticker as ticker
 import matplotlib.colors as colors
 import time 
 
-traw = np.loadtxt(open("time0.csv", "rb"), delimiter=",", skiprows=0)
-xraw = np.loadtxt(open("xout0.csv", "rb"), delimiter=",", skiprows=0)
+traw = np.loadtxt(open("time.csv", "rb"), delimiter=",", skiprows=0)
+xraw = np.loadtxt(open("xout2.csv", "rb"), delimiter=",", skiprows=0)
 #lraw = np.loadtxt(open("lout.csv", "rb"), delimiter=",", skiprows=1)
-fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
+#fraw = np.loadtxt(open("tomout.csv", "rb"), delimiter=",", skiprows=1)
 #params = np.loadtxt(open("parameters.dat", "rb"), delimiter=",", skiprows=1)
-sraw = np.loadtxt(open("slips.dat", "rb"), skiprows=0)
+#sraw = np.loadtxt(open("slips.dat", "rb"), skiprows=0)
 snthraw = np.loadtxt(open("slipsnth.dat", "rb"), skiprows=0)
-sthraw = np.loadtxt(open("slipsth.dat", "rb"), skiprows=0)
+#sthraw = np.loadtxt(open("slipsth.dat", "rb"), skiprows=0)
 
 nscale = 1.0e9  # WARNING this is *only* for plotting, danger!
 
@@ -23,13 +23,13 @@ nscale = 1.0e9  # WARNING this is *only* for plotting, danger!
 #sdata = nscale * traw[:,1]
 #xdata = nscale * xraw[:,0]
 ##ldata = nscale * lraw[:,0]
-fdata = nscale * fraw[:,2]
+#fdata = nscale * fraw[:,2]
 
 tdata = nscale * traw
 xdata = nscale * xraw
 #fdata = nscale * fraw
-sdata = nscale * sraw
-sthdata = nscale * sthraw
+#sdata = nscale * sraw
+#sthdata = nscale * sthraw
 snthdata = nscale * snthraw
 
 #fig0, ax = plt.subplots()

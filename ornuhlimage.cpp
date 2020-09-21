@@ -73,24 +73,26 @@ int main()
 	string lfile = "lout.csv";
 	string tomfile = "tomout.csv";
     string pfile = "parameters.dat";
-    
-    uint totalruns = 1; // please keep me a factor of nfiles
-    uint ncores = 4;
-    uint nfiles = 1; 
+    string tfile = "time.csv";
+
+    uint totalruns = 1e5; // please keep me a factor of nfiles
+    uint ncores = 10;
+    uint nfiles = 10; 
 
     uint runs = totalruns / nfiles;
 
+        #pragma omp parallel
+        {
+            #pragma omp for nowait
     for (uint m = 0; m < nfiles; m++) // yes, I'm reversing my loop index concention here... shit happens when you party nude
     {
-	    string xfile = "xout" + to_string(m) + ".csv";
-	    string tfile = "time" + to_string(m) + ".csv";
+	    string xfile = "xout" + to_string(m+90) + ".csv";
+	    //string tfile = "time" + to_string(m) + ".csv";
         
         vector <double> publicpos;
         vector <double> publicf;
         publicpos.reserve(runs*tsteps);
 
-        #pragma omp parallel
-        {
             vector <double>privatepos;
             vector <double>privatef;
             if (runs > ncores)
@@ -98,7 +100,6 @@ int main()
             else
                 privatepos.reserve(tsteps);
 
-            #pragma omp for nowait
             for (uint l = 0; l < runs; l++)
             {
                     tomlin afm(spring1,spring2,supvel,latcon,align,barr1,barr2,kappa1,
@@ -147,14 +148,13 @@ int main()
 
                 auto posptr = afm.getposs();
                 privatepos.insert(privatepos.end(),posptr->begin(),posptr->end());
-                auto fptr = afm.getfrics();
-                privatef.insert(privatef.end(),fptr->begin(),fptr->end());
+                //auto fptr = afm.getfrics();
+                //privatef.insert(privatef.end(),fptr->begin(),fptr->end());
                 //afm.writedata();    // REMOVE WHEN PARALLEL
             }
-            #pragma omp critical
+	    // pragma omp critical
             publicpos.insert(publicpos.end(),privatepos.begin(),privatepos.end());
-            publicf.insert(publicf.end(),privatef.begin(),privatef.end());
-        }
+            //publicf.insert(publicf.end(),privatef.begin(),privatef.end());
         
         //afm.printins();
         //afm.printouts();
@@ -268,22 +268,25 @@ int main()
 
         //// write at predefined grid
         
-        ofstream xstream, tstream; 
+        ofstream xstream; //tstream; 
         
-        vector <double> times;
-        for (auto &k : antsteps)
-            times.push_back(k*tstep);
-
-        tstream.open(tfile);
-        for (auto &k : times)
-            tstream << k << endl; 
+        //vector <double> times;
+        //for (auto &el : antsteps)
+        //    times.push_back(el*tstep);
+	//
+	//tstream.open(tfile);
+        //for (auto &el : times)
+        //    tstream << el << endl; 
 
         xstream.open(xfile);
-        for (auto &k : antsteps)
-            xstream << setprecision(16) << publicpos[k] << endl << publicpos[k+1] << endl;
-        tstream.close();
+	for (uint k = 0; k < runs; k++)
+	{
+        for (auto &el : antsteps)
+            xstream << setprecision(16) << publicpos[el+k*tsteps] << endl << publicpos[el+1+k*tsteps] << endl;
+	}
+        //tstream.close();
         xstream.close();
-        
+        }
     }
 }
 
