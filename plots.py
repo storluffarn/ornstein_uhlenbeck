@@ -112,4 +112,17 @@ fig1.savefig("plots/plot_x.png")
 #
 #fig6.savefig("plots/histogram.png")
 
+ttmp = nscale*np.loadtxt(open("./data/std_case/time.csv", "rb"), delimiter=",", skiprows=0)
+xtmp = nscale*np.loadtxt(open("./data/std_case/xout0.csv", "rb"), delimiter=",", skiprows=0)
+
+index = 0
+oldx = ttmp[0]
+
+for x in xtmp :
+    if x - oldx < - 0.5 : 
+        index = index + 1
+        print(x,oldx,x-oldx)
+    oldx  = x
+
+print (index)
 

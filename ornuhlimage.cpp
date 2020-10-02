@@ -51,7 +51,7 @@ int main()
 	
 	double modif = 0.5;	// 0.5 gives reliable time step dep. 1.0 should be ok
     double tstep = modif * 3e-14;	
-	uint tsteps = 1.0/modif * 1.0e5;	// has to be even beucasue lazyness
+	uint tsteps = 1.0/modif * 4.0e4;	// has to be even beucasue lazyness
 
     vector <uint> antsteps;
     ifstream reads ("./antimes.csv");
@@ -75,18 +75,17 @@ int main()
     string pfile = "parameters.dat";
     string tfile = "time.csv";
 
-    uint totalruns = 1e5; // please keep me a factor of nfiles
-    uint ncores = 10;
+    uint ncores = 1;
     uint nfiles = 10; 
 
-    uint runs = totalruns / nfiles;
+    uint runs = 10;
 
         #pragma omp parallel
         {
             #pragma omp for nowait
     for (uint m = 0; m < nfiles; m++) // yes, I'm reversing my loop index concention here... shit happens when you party nude
     {
-	    string xfile = "xout" + to_string(m+90) + ".csv";
+	    string xfile = "xout" + to_string(m+0) + ".csv";
 	    //string tfile = "time" + to_string(m) + ".csv";
         
         vector <double> publicpos;
@@ -218,35 +217,35 @@ int main()
         
         //// write at constant distance
         
-        //uint writeat = 1;
-        //vector <double> times;
-        //times.reserve(round(tsteps/writeat));
+        uint writeat = 500;
+        vector <double> times;
+        times.reserve(round(tsteps/writeat));
 
-        //for (uint k = 0; k < tsteps; k++)
-        //    times.push_back(k*tstep);
+        for (uint k = 0; k < tsteps; k++)
+            times.push_back(k*tstep);
 
-        //ofstream xstream, tstream;
+        ofstream xstream, tstream;
 
-        //tstream.open(tfile);
-        //for (uint k = 0; k < times.size(); k++)
-        //{
-        //    if (k % writeat == 0) 
-        //    {
-        //        tstream << times[k] << endl;
-        //    }
-        //}
+        tstream.open(tfile);
+        for (uint k = 0; k < times.size() - 1; k++)	// -1 because consecutive points written, avoids out of bound
+        {
+            if (k % writeat == 0) 
+            {
+                tstream << setprecision(16) << times[k] << endl << times[k+1] << endl;
+            }
+        }
 
-        //xstream.open(xfile);
-        //for (uint k = 0; k < publicpos.size() - 1; k++)
-        //{
-        //    if (k % writeat == 0) 
-        //    {
-        //        xstream << setprecision(16) << publicpos[k] << endl << publicpos[k+1] << endl;
-        //    }
-        //}
+        xstream.open(xfile);
+        for (uint k = 0; k < publicpos.size() - 1; k++)
+        {
+            if (k % writeat == 0) 
+            {
+                xstream << setprecision(16) << publicpos[k] << endl << publicpos[k+1] << endl;
+            }
+        }
 
-        //tstream.close();
-        //xstream.close();
+        tstream.close();
+        xstream.close();
        
         // write slipping points 
 
@@ -268,7 +267,7 @@ int main()
 
         //// write at predefined grid
         
-        ofstream xstream; //tstream; 
+        //ofstream xstream; //tstream; 
         
         //vector <double> times;
         //for (auto &el : antsteps)
@@ -278,14 +277,14 @@ int main()
         //for (auto &el : times)
         //    tstream << el << endl; 
 
-        xstream.open(xfile);
-	for (uint k = 0; k < runs; k++)
-	{
-        for (auto &el : antsteps)
-            xstream << setprecision(16) << publicpos[el+k*tsteps] << endl << publicpos[el+1+k*tsteps] << endl;
-	}
-        //tstream.close();
-        xstream.close();
+        //xstream.open(xfile);
+	//for (uint k = 0; k < runs; k++)
+	//{
+        //for (auto &el : antsteps)
+        //    xstream << setprecision(16) << publicpos[el+k*tsteps] << endl << publicpos[el+1+k*tsteps] << endl;
+	//}
+        ////tstream.close();
+        //xstream.close();
         }
     }
 }
