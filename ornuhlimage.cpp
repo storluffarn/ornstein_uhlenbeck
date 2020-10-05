@@ -75,15 +75,14 @@ int main()
     string pfile = "parameters.dat";
     string tfile = "time.csv";
 
-    uint ncores = 1;
     uint nfiles = 10; 
 
-    uint runs = 10;
+    uint runs = 20;
 
         #pragma omp parallel
         {
             #pragma omp for nowait
-    for (uint m = 0; m < nfiles; m++) // yes, I'm reversing my loop index concention here... shit happens when you party nude
+    for (uint m = 0; m < nfiles; m++) // yes, I'm reversing my loop index convention here... shit happens when you party nude
     {
 	    string xfile = "xout" + to_string(m+0) + ".csv";
 	    //string tfile = "time" + to_string(m) + ".csv";
@@ -94,10 +93,7 @@ int main()
 
             vector <double>privatepos;
             vector <double>privatef;
-            if (runs > ncores)
-                privatepos.reserve(tsteps*ceil((double)runs/ncores));
-            else
-                privatepos.reserve(tsteps);
+            privatepos.reserve(tsteps);
 
             for (uint l = 0; l < runs; l++)
             {
